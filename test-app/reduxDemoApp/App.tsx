@@ -10,35 +10,23 @@
 
 import React from 'react';
 import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
-import MemoisedComponent from './components/MemoisedComponent';
-import MemoisedVariables from './components/MemoisedVariables';
-import ShallowComparison from './components/ShallowComparison';
+import Learning from './components/Learning/Learning';
 
 const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View>
         <Text>Welcome to the Dev Suite</Text>
-        <ShallowComparison />
-        <Spacer />
-        <MemoisedComponent />
-        <MemoisedVariables />
+        <Learning />
       </View>
     </SafeAreaView>
   );
 };
 
-const Spacer = () => {
-  return <View style={styles.spacer} />;
-};
-
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'lightblue',
+    backgroundColor: 'pink',
     height: '100%',
-  },
-  spacer: {
-    height: 20,
   },
 });
 

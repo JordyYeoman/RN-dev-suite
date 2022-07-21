@@ -2,26 +2,24 @@ import React, {useState} from 'react';
 import {
   TouchableOpacity,
   Button,
-  PermissionsAndroid,
+  // PermissionsAndroid,
   View,
   Text,
 } from 'react-native';
 
 import base64 from 'react-native-base64';
-
 import CheckBox from '@react-native-community/checkbox';
-
 import {BleManager, Device} from 'react-native-ble-plx';
 import {styles} from './styles';
 import {LogBox} from 'react-native';
 
-LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
-LogBox.ignoreAllLogs(); //Ignore all log notifications
+// Ignore log notification by message
+LogBox.ignoreLogs(['new NativeEventEmitter']);
+//Ignore all log notifications
+LogBox.ignoreAllLogs();
 
 const BLTManager = new BleManager();
-
 const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
-
 const MESSAGE_UUID = '6d68efe5-04b6-4a85-abc4-c2670b7bf7fd';
 const BOX_UUID = 'f27b53ad-c63d-49a0-8c0f-9f297e6cc520';
 
@@ -33,56 +31,52 @@ function StringToBool(input: String) {
   }
 }
 
-function BoolToString(input: boolean) {
-  if (input == true) {
-    return '1';
-  } else {
-    return '0';
-  }
-}
+// function BoolToString(input: boolean) {
+//   if (input == true) {
+//     return '1';
+//   } else {
+//     return '0';
+//   }
+// }
 
 export default function App() {
   //Is a device connected?
   const [isConnected, setIsConnected] = useState(false);
-
   //What device is connected?
   const [connectedDevice, setConnectedDevice] = useState<Device>();
-
   const [message, setMessage] = useState('Nothing Yet');
   const [boxvalue, setBoxValue] = useState(false);
 
   // Scans availbale BLT Devices and then call connectDevice
-  async function scanDevices() {
-    PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      {
-        title: 'Permission Localisation Bluetooth',
-        message: 'Requirement for Bluetooth',
-        buttonNeutral: 'Later',
-        buttonNegative: 'Cancel',
-        buttonPositive: 'OK',
-      },
-    ).then(answere => {
-      console.log('scanning');
-      // display the Activityindicator
-
-      BLTManager.startDeviceScan(null, null, (error, scannedDevice) => {
-        if (error) {
-          console.warn(error);
-        }
-
-        if (scannedDevice && scannedDevice.name == 'BLEExample') {
-          BLTManager.stopDeviceScan();
-          connectDevice(scannedDevice);
-        }
-      });
-
-      // stop scanning devices after 5 seconds
-      setTimeout(() => {
-        BLTManager.stopDeviceScan();
-      }, 5000);
-    });
-  }
+  // async function scanDevices() {
+  //   PermissionsAndroid.request(
+  //     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //     {
+  //       title: 'Permission Localisation Bluetooth',
+  //       message: 'Requirement for Bluetooth',
+  //       buttonNeutral: 'Later',
+  //       buttonNegative: 'Cancel',
+  //       buttonPositive: 'OK',
+  //     },
+  //   ).then((answer: string) => {
+  //     console.log('Answer: ', answer);
+  //     console.log('scanning');
+  //     // display the Activityindicator
+  //     BLTManager.startDeviceScan(null, null, (error, scannedDevice) => {
+  //       if (error) {
+  //         console.warn(error);
+  //       }
+  //       if (scannedDevice && scannedDevice.name == 'BLEExample') {
+  //         BLTManager.stopDeviceScan();
+  //         connectDevice(scannedDevice);
+  //       }
+  //     });
+  //     // stop scanning devices after 5 seconds
+  //     setTimeout(() => {
+  //       BLTManager.stopDeviceScan();
+  //     }, 5000);
+  //   });
+  // }
 
   const doShit = () => {
     console.log('Button pressed');
@@ -91,7 +85,7 @@ export default function App() {
         console.warn(error);
       }
       console.log('Scanned Device name: ', scannedDevice?.name);
-      console.log('Scanned Device: ', scannedDevice);
+      // console.log('Scanned Device: ', scannedDevice);
       if (scannedDevice && scannedDevice.name == 'BLEExample') {
         BLTManager.stopDeviceScan();
         connectDevice(scannedDevice);
@@ -127,20 +121,19 @@ export default function App() {
   }
 
   //Function to send data to ESP32
-  async function sendBoxValue(value: boolean) {
-    BLTManager.writeCharacteristicWithResponseForDevice(
-      connectedDevice?.id,
-      SERVICE_UUID,
-      BOX_UUID,
-      base64.encode(value.toString()),
-    ).then(characteristic => {
-      console.log('Boxvalue changed to :', base64.decode(characteristic.value));
-    });
-  }
+  // async function sendBoxValue(value: boolean) {
+  //   BLTManager.writeCharacteristicWithResponseForDevice(
+  //     connectedDevice?.id,
+  //     SERVICE_UUID,
+  //     BOX_UUID,
+  //     base64.encode(value.toString()),
+  //   ).then(characteristic => {
+  //     console.log('Boxvalue changed to :', base64.decode(characteristic.value));
+  //   });
+  // }
   //Connect the device and start monitoring characteristics
   async function connectDevice(device: Device) {
     console.log('connecting to Device:', device.name);
-
     device
       .connect()
       .then(device => {
@@ -225,13 +218,13 @@ export default function App() {
         <TouchableOpacity style={{width: 120}}>
           {!isConnected ? (
             <>
-              <Button
+              {/* <Button
                 title="Connect"
                 onPress={() => {
                   scanDevices();
                 }}
                 disabled={false}
-              />
+              /> */}
 
               <Button
                 title="Scan"
@@ -270,6 +263,7 @@ export default function App() {
           disabled={false}
           value={boxvalue}
           onValueChange={newValue => {
+            console.log('New value: ', newValue);
             // setBoxValue(newValue);
             // sendBoxValue(BoolToString(newValue));
           }}
