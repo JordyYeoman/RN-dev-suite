@@ -14,7 +14,4 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-AppRegistry.registerComponent(
-  appName,
-  () => require('./AppWrapper').AppWrapper,
-);
+AppRegistry.registerComponent(appName, () => require('./AppWrapper').default);
