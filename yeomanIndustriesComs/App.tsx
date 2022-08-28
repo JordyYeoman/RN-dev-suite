@@ -1,20 +1,19 @@
-import React from 'react';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import * as React from 'react';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import DetailsScreen from './components/screens/DetailsScreen';
+import HomeScreen from './components/screens/HomeScreen';
+import BLEScannerScreen from './components/screens/BLEScannerScreen';
 
-const App = () => {
+const Stack = createNativeStackNavigator();
+
+function App() {
   return (
-    <SafeAreaView>
-      <View style={styles.container}>
-        <Text>Hello man, how are you?</Text>
-      </View>
-    </SafeAreaView>
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Details" component={DetailsScreen} />
+      <Stack.Screen name="BLEScanner" component={BLEScannerScreen} />
+    </Stack.Navigator>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'grey',
-  },
-});
+}
 
 export default App;
