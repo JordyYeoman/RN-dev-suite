@@ -14,10 +14,10 @@ import {
   FlatList,
   TouchableHighlight,
 } from 'react-native';
-import useInterval from '@use-it/interval';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import BleManager from 'react-native-ble-manager';
 import {Buffer} from 'buffer';
+import useInterval from '../../utils/hooks/useInterval';
 
 // RSSI -> Received signal strength indicator
 
@@ -53,15 +53,15 @@ const BLEScannerScreen = () => {
     setIsScanning(false);
   };
 
-  const handleDisconnectedPeripheral = data => {
-    let peripheral = peripherals.get(data.peripheral);
-    if (peripheral) {
-      peripheral.connected = false;
-      peripherals.set(peripheral.id, peripheral);
-      setList(Array.from(peripherals.values()));
-    }
-    console.log('Disconnected from ' + data.peripheral);
-  };
+  // const handleDisconnectedPeripheral = data => {
+  //   let peripheral = peripherals.get(data.peripheral);
+  //   if (peripheral) {
+  //     peripheral.connected = false;
+  //     peripherals.set(peripheral.id, peripheral);
+  //     setList(Array.from(peripherals.values()));
+  //   }
+  //   console.log('Disconnected from ' + data.peripheral);
+  // };
 
   //   const handleUpdateValueForCharacteristic = data => {
   //     console.log(
@@ -178,15 +178,15 @@ const BLEScannerScreen = () => {
   useEffect(() => {
     BleManager.start({showAlert: false});
 
-    bleManagerEmitter.addListener(
-      'BleManagerDiscoverPeripheral',
-      handleDiscoverPeripheral,
-    );
-    bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan);
-    bleManagerEmitter.addListener(
-      'BleManagerDisconnectPeripheral',
-      handleDisconnectedPeripheral,
-    );
+    // bleManagerEmitter.addListener(
+    //   'BleManagerDiscoverPeripheral',
+    //   handleDiscoverPeripheral,
+    // );
+    // bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan);
+    // bleManagerEmitter.addListener(
+    //   'BleManagerDisconnectPeripheral',
+    //   handleDisconnectedPeripheral,
+    // );
     // bleManagerEmitter.addListener(
     //   'BleManagerDidUpdateValueForCharacteristic',
     //   handleUpdateValueForCharacteristic,
@@ -201,11 +201,11 @@ const BLEScannerScreen = () => {
         } else {
           PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          ).then(result => {
-            if (result) {
-              console.log('User accept');
+          ).then(permissionResult => {
+            if (permissionResult) {
+              console.log('User accepted');
             } else {
-              console.log('User refuse');
+              console.log('User refused');
             }
           });
         }
@@ -214,15 +214,15 @@ const BLEScannerScreen = () => {
 
     return () => {
       console.log('unmount');
-      bleManagerEmitter.removeListener(
-        'BleManagerDiscoverPeripheral',
-        handleDiscoverPeripheral,
-      );
-      bleManagerEmitter.removeListener('BleManagerStopScan', handleStopScan);
-      bleManagerEmitter.removeListener(
-        'BleManagerDisconnectPeripheral',
-        handleDisconnectedPeripheral,
-      );
+      // bleManagerEmitter.removeListener(
+      //   'BleManagerDiscoverPeripheral',
+      //   handleDiscoverPeripheral,
+      // );
+      // bleManagerEmitter.removeListener('BleManagerStopScan', handleStopScan);
+      // bleManagerEmitter.removeListener(
+      //   'BleManagerDisconnectPeripheral',
+      //   handleDisconnectedPeripheral,
+      // );
       //   bleManagerEmitter.removeListener(
       //     'BleManagerDidUpdateValueForCharacteristic',
       //     handleUpdateValueForCharacteristic,
