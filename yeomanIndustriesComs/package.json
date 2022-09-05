@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-navigation/native": "^6.0.12",
     "@react-navigation/native-stack": "^6.8.0",
+    "@reduxjs/toolkit": "^1.8.5",
     "@use-it/interval": "^1.0.0",
     "buffer": "^6.0.3",
     "react": "18.0.0",
@@ -20,7 +21,8 @@
     "react-native-safe-area-context": "^4.3.3",
     "react-native-screens": "^3.17.0",
     "react-native-svg": "^13.0.0",
-    "react-native-svg-charts": "^5.4.0"
+    "react-native-svg-charts": "^5.4.0",
+    "react-redux": "^8.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

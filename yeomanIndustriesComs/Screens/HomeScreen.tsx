@@ -1,34 +1,28 @@
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import React, {useState} from 'react';
-import {View, Text, SafeAreaView} from 'react-native';
-import {GlobalStyles} from '../../styles/GlobalStyles';
-import BoxLayout from './BoxLayout';
-import PieChartWithDynamicSlices from './PieChartWithDynamicSlices';
-import TopBarNavigation from './TopBarNavigation';
-
-type RootStackParamList = {
-  Home: undefined;
-  Details: {
-    itemId: number;
-    itemName: string;
-  };
-  BLEScanner: undefined;
-};
-
-type Props = NativeStackScreenProps<
-  RootStackParamList,
-  'Home' | 'Details' | 'BLEScanner'
->;
+import {View, Text, SafeAreaView, Button} from 'react-native';
+import {useSelector, useDispatch} from 'react-redux';
+import {GlobalStyles} from '../styles/GlobalStyles';
+import {decrement, increment} from '../store/Counter/Slice';
+import {RootState} from '../store/store';
+import BoxLayout from '../components/BoxLayout';
+import PieChartWithDynamicSlices from '../components/PieChartWithDynamicSlices';
+import TopBarNavigation from '../components/TopBarNavigation';
+import {Props, ScreenType} from '../Types/Globaltypes';
 
 function HomeScreen({navigation}: Props) {
+  const count = useSelector((state: RootState) => state.counter.value);
+  const dispatch = useDispatch();
   const [connected, setConnected] = useState<boolean>(true);
 
   return (
     <View
       style={[GlobalStyles.rootBackgroundColor, GlobalStyles.screenContainer]}>
       <SafeAreaView>
-        <TopBarNavigation navigation={navigation} />
+        <TopBarNavigation navigation={navigation} screen={ScreenType.HOME} />
         <BoxLayout marginTop={0}>
+          <Text>Value: {count}</Text>
+          <Button title={'Decrement'} onPress={() => dispatch(decrement())} />
+          <Button title={'Increment'} onPress={() => dispatch(increment())} />
           <View
             style={{
               flexDirection: 'row',

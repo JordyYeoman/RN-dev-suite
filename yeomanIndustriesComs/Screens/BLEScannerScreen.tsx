@@ -17,7 +17,10 @@ import {
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import BleManager from 'react-native-ble-manager';
 import {Buffer} from 'buffer';
-import useInterval from '../../utils/hooks/useInterval';
+import useInterval from '../utils/hooks/useInterval';
+import {GlobalStyles} from '../styles/GlobalStyles';
+import TopBarNavigation from '../components/TopBarNavigation';
+import {Props, ScreenType} from '../Types/Globaltypes';
 
 // RSSI -> Received signal strength indicator
 
@@ -28,7 +31,7 @@ const PERIPHERAL_ID = 'B604D8B3-EB4D-C6B3-E257-9F2EC29F9C16';
 const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
 const CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
 
-const BLEScannerScreen = () => {
+const BLEScannerScreen = ({navigation}: Props) => {
   const [count, setCount] = useState(0);
   const [connectedID, setConnectedID] = useState('');
   const [isScanning, setIsScanning] = useState<boolean>(false);
@@ -46,11 +49,6 @@ const BLEScannerScreen = () => {
           console.error(err);
         });
     }
-  };
-
-  const handleStopScan = () => {
-    console.log('Scan is stopped');
-    setIsScanning(false);
   };
 
   // const handleDisconnectedPeripheral = data => {
@@ -240,7 +238,7 @@ const BLEScannerScreen = () => {
     ) {
       readBLEValue();
     }
-  }, 50);
+  }, 50); // 50ms should mean 20 updates per second
 
   //   // Read BLE value
   const readBLEValue = () => {
@@ -298,9 +296,13 @@ const BLEScannerScreen = () => {
   };
 
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
+    <View
+      style={[GlobalStyles.rootBackgroundColor, GlobalStyles.screenContainer]}>
       <SafeAreaView>
+        <TopBarNavigation
+          navigation={navigation}
+          screen={ScreenType.SECONDARY}
+        />
         <Text>{count}</Text>
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
@@ -333,7 +335,7 @@ const BLEScannerScreen = () => {
           keyExtractor={item => item.id}
         />
       </SafeAreaView>
-    </>
+    </View>
   );
 };
 

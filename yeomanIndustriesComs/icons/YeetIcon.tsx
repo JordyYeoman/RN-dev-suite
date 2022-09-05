@@ -4,6 +4,7 @@ import SettingsIcon from './SettingsIcon';
 import NotificationIcon from './NotificationIcon';
 import PlusIcon from './PlusIcon';
 import UserCircleIcon from './UserCircleIcon';
+import BackArrowIcon from './BackArrowIcon';
 
 export enum IconToken {
   SETTINGS,
@@ -12,6 +13,7 @@ export enum IconToken {
   USER,
   USERCIRCLE,
   BELL,
+  BACKARROW,
 }
 
 type Props = {
@@ -28,6 +30,8 @@ const getIconForToken = (token: IconToken) => {
       return <PlusIcon />;
     case IconToken.USERCIRCLE:
       return <UserCircleIcon />;
+    case IconToken.BACKARROW:
+      return <BackArrowIcon />;
     case IconToken.BELL:
       return <NotificationIcon />;
     default:

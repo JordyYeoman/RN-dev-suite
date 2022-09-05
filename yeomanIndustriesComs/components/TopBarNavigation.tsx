@@ -1,10 +1,17 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import {IconToken} from '../../icons/YeetIcon';
-import {GlobalStyles} from '../../styles/GlobalStyles';
+import {IconToken} from '../icons/YeetIcon';
+import {GlobalStyles} from '../styles/GlobalStyles';
+import {ScreenType} from '../Types/Globaltypes';
 import CircleNavButton from './CircleNavButton';
 
-function TopBarNavigation({navigation}: any) {
+export type Props = {
+  navigation: any;
+  screen: ScreenType;
+  title?: string;
+};
+
+const HomeNavBar = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.flex}>
@@ -31,9 +38,27 @@ function TopBarNavigation({navigation}: any) {
       </View>
     </View>
   );
-}
+};
 
-export default TopBarNavigation;
+const SecondaryNavBar = ({navigation, title}: any) => {
+  return (
+    <View style={styles.container}>
+      <View style={styles.flex}>
+        <CircleNavButton
+          iconToken={IconToken.BACKARROW}
+          navigation={navigation}
+          navigateTo={''}
+          iconSize={26}
+        />
+        <View style={{paddingLeft: 10}} />
+        <Text style={GlobalStyles.NavText}>{title}</Text>
+      </View>
+      <View style={styles.flex}>
+        <Text>Connected: </Text>
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -50,3 +75,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+function TopBarNavigation({navigation, screen, title}: Props) {
+  switch (screen) {
+    case ScreenType.HOME:
+      return <HomeNavBar navigation={navigation} />;
+    case ScreenType.SECONDARY:
+      return <SecondaryNavBar navigation={navigation} title={title ?? ''} />;
+  }
+}
+
+export default TopBarNavigation;

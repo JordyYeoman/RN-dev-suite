@@ -1,7 +1,7 @@
 import React from 'react';
 import {Text, View, Dimensions} from 'react-native';
 import {PieChart} from 'react-native-svg-charts';
-import {themeStyles} from '../../styles/GlobalStyles';
+import {themeStyles} from '../styles/GlobalStyles';
 
 class PieChartWithDynamicSlices extends React.PureComponent {
   constructor(props: {}) {

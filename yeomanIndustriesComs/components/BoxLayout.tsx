@@ -1,6 +1,6 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
-import {themeStyles} from '../../styles/GlobalStyles';
+import {themeStyles} from '../styles/GlobalStyles';
 
 const BoxLayout = ({children, marginTop}: any) => {
   const styles = StyleSheet.create({

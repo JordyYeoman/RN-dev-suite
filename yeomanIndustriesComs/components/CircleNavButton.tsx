@@ -1,7 +1,7 @@
 import React from 'react';
 import {ColorValue, StyleSheet, TouchableOpacity, View} from 'react-native';
-import YeetIcon, {IconToken} from '../../icons/YeetIcon';
-import {themeStyles} from '../../styles/GlobalStyles';
+import YeetIcon, {IconToken} from '../icons/YeetIcon';
+import {themeStyles} from '../styles/GlobalStyles';
 
 type CircleNavProps = {
   iconToken?: IconToken;
@@ -28,10 +28,18 @@ const CircleNavButton = (props: CircleNavProps) => {
     },
   });
 
+  const handleNavigation = () => {
+    if (navigateTo === '') {
+      navigation.popToTop();
+      return;
+    }
+    navigation.navigate(navigateTo);
+  };
+
   return (
     <TouchableOpacity
       style={CircleStyles.container}
-      onPress={() => navigation.navigate(navigateTo)}>
+      onPress={() => handleNavigation()}>
       <View style={CircleStyles.iconContainer}>
         {iconToken || iconToken === 0 ? (
           <YeetIcon iconToken={iconToken} />
