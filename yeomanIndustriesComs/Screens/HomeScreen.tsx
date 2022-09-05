@@ -1,64 +1,61 @@
-import React, {useState} from 'react';
-import {View, Text, SafeAreaView, Button} from 'react-native';
-import {useSelector, useDispatch} from 'react-redux';
+import React from 'react';
+import {View, Text, SafeAreaView, TouchableOpacity} from 'react-native';
+import {useSelector} from 'react-redux';
 import {GlobalStyles} from '../styles/GlobalStyles';
-import {decrement, increment} from '../store/Counter/Slice';
 import {RootState} from '../store/store';
 import BoxLayout from '../components/BoxLayout';
 import PieChartWithDynamicSlices from '../components/PieChartWithDynamicSlices';
 import TopBarNavigation from '../components/TopBarNavigation';
 import {Props, ScreenType} from '../Types/Globaltypes';
+import {DataPoint} from '../components/DataPoint';
 
 function HomeScreen({navigation}: Props) {
-  const count = useSelector((state: RootState) => state.counter.value);
-  const dispatch = useDispatch();
-  const [connected, setConnected] = useState<boolean>(true);
+  const {connected} = useSelector((state: RootState) => state.user);
 
   return (
     <View
       style={[GlobalStyles.rootBackgroundColor, GlobalStyles.screenContainer]}>
       <SafeAreaView>
         <TopBarNavigation navigation={navigation} screen={ScreenType.HOME} />
-        <BoxLayout marginTop={0}>
-          <Text>Value: {count}</Text>
-          <Button title={'Decrement'} onPress={() => dispatch(decrement())} />
-          <Button title={'Increment'} onPress={() => dispatch(increment())} />
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-            <Text style={{fontSize: 20, fontWeight: '700', color: 'white'}}>
-              Analytics
-            </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Analytics')}>
+          <BoxLayout marginTop={0}>
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: '700',
-                  color: 'white',
-                  paddingRight: 4,
-                }}>
-                Status:
+              <Text style={{fontSize: 20, fontWeight: '700', color: 'white'}}>
+                Analytics
               </Text>
               <View
                 style={{
-                  borderRadius: 100,
-                  backgroundColor: connected ? 'blue' : 'red',
-                  height: 10,
-                  width: 10,
-                  marginTop: 2,
-                }}></View>
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: '700',
+                    color: 'white',
+                    paddingRight: 4,
+                  }}>
+                  Status:
+                </Text>
+                <View
+                  style={{
+                    borderRadius: 100,
+                    backgroundColor: connected ? 'green' : 'red',
+                    height: 10,
+                    width: 10,
+                    marginTop: 2,
+                  }}></View>
+              </View>
             </View>
-          </View>
-          <PieChartWithDynamicSlices />
-        </BoxLayout>
+            <PieChartWithDynamicSlices />
+          </BoxLayout>
+        </TouchableOpacity>
         <BoxLayout marginTop={16}>
           <Text
             style={{
@@ -101,27 +98,3 @@ function HomeScreen({navigation}: Props) {
 }
 
 export default HomeScreen;
-
-type DataPointProps = {
-  text: string;
-  dataPoint: number;
-};
-
-const DataPoint = ({text, dataPoint}: DataPointProps) => {
-  return (
-    <View style={{flexDirection: 'row', paddingVertical: 4}}>
-      <Text style={{fontSize: 14, fontWeight: '700', color: 'white'}}>
-        {text}:
-      </Text>
-      <Text
-        style={{
-          paddingLeft: 8,
-          fontSize: 14,
-          fontWeight: '700',
-          color: 'white',
-        }}>
-        {dataPoint}
-      </Text>
-    </View>
-  );
-};

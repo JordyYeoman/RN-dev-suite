@@ -302,6 +302,7 @@ const BLEScannerScreen = ({navigation}: Props) => {
         <TopBarNavigation
           navigation={navigation}
           screen={ScreenType.SECONDARY}
+          title={'Bluetooth Menu'}
         />
         <Text>{count}</Text>
         <ScrollView

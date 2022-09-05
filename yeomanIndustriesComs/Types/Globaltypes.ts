@@ -7,11 +7,12 @@ export type RootStackParamList = {
     itemName: string;
   };
   BLEScanner: undefined;
+  Analytics: undefined;
 };
 
 export type Props = NativeStackScreenProps<
   RootStackParamList,
-  'Home' | 'Details' | 'BLEScanner'
+  'Home' | 'Details' | 'BLEScanner' | 'Analytics'
 >;
 
 export enum ScreenType {

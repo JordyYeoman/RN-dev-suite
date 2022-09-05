@@ -1,6 +1,8 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
+import {useSelector} from 'react-redux';
 import {IconToken} from '../icons/YeetIcon';
+import {RootState} from '../store/store';
 import {GlobalStyles} from '../styles/GlobalStyles';
 import {ScreenType} from '../Types/Globaltypes';
 import CircleNavButton from './CircleNavButton';
@@ -41,6 +43,7 @@ const HomeNavBar = ({navigation}: any) => {
 };
 
 const SecondaryNavBar = ({navigation, title}: any) => {
+  const {connected} = useSelector((state: RootState) => state.user);
   return (
     <View style={styles.container}>
       <View style={styles.flex}>
@@ -53,8 +56,13 @@ const SecondaryNavBar = ({navigation, title}: any) => {
         <View style={{paddingLeft: 10}} />
         <Text style={GlobalStyles.NavText}>{title}</Text>
       </View>
-      <View style={styles.flex}>
-        <Text>Connected: </Text>
+      <View
+        style={[
+          styles.flex,
+          styles.status,
+          {borderColor: connected ? 'green' : 'red'},
+        ]}>
+        <Text style={styles.secondaryNavigationText}>Online</Text>
       </View>
     </View>
   );
@@ -73,6 +81,15 @@ const styles = StyleSheet.create({
   flex: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  secondaryNavigationText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'white',
+  },
+  status: {
+    borderBottomWidth: 2,
+    marginBottom: -4,
   },
 });
 
