@@ -1,11 +1,13 @@
 import counterReducer from '../store/Counter/Slice';
 import {configureStore} from '@reduxjs/toolkit';
 import userReducer from '../store/User/Slice';
+import bluetoothReducer from '../store/Bluetooth/Slice';
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     user: userReducer,
+    bluetooth: bluetoothReducer,
   },
 });
 

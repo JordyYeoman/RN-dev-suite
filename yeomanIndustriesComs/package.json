@@ -13,6 +13,7 @@
     "@react-navigation/native": "^6.0.12",
     "@react-navigation/native-stack": "^6.8.0",
     "@reduxjs/toolkit": "^1.8.5",
+    "@types/node": "^18.7.15",
     "@use-it/interval": "^1.0.0",
     "buffer": "^6.0.3",
     "react": "18.0.0",

@@ -5,86 +5,30 @@ import {
   ScrollView,
   View,
   Text,
-  StatusBar,
-  NativeModules,
-  NativeEventEmitter,
   Button,
-  Platform,
-  PermissionsAndroid,
   FlatList,
   TouchableHighlight,
+  NativeEventEmitter,
+  NativeModules,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import BleManager from 'react-native-ble-manager';
-import {Buffer} from 'buffer';
 import useInterval from '../utils/hooks/useInterval';
 import {GlobalStyles} from '../styles/GlobalStyles';
 import TopBarNavigation from '../components/TopBarNavigation';
 import {Props, ScreenType} from '../Types/Globaltypes';
+import {useDispatch} from 'react-redux';
+import {BleManager} from '../utils/bleManager';
 
-// RSSI -> Received signal strength indicator
-
-const BleManagerModule = NativeModules.BleManager;
-const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
-// ESP32 Peripheral ID
-const PERIPHERAL_ID = 'B604D8B3-EB4D-C6B3-E257-9F2EC29F9C16';
-const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
-const CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+const bleManager = new BleManager();
+const bleManagerEventEmitter = new NativeEventEmitter(NativeModules.BleManager);
 
 const BLEScannerScreen = ({navigation}: Props) => {
   const [count, setCount] = useState(0);
   const [connectedID, setConnectedID] = useState('');
   const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [devicesFound, setDevicesFound] = useState<any>([]);
   const peripherals = new Map();
-  const [list, setList] = useState<any>([]);
-
-  const startScan = () => {
-    if (!isScanning) {
-      BleManager.scan([], 3, true)
-        .then(_results => {
-          console.log('Scanning...');
-          setIsScanning(true);
-        })
-        .catch(err => {
-          console.error(err);
-        });
-    }
-  };
-
-  // const handleDisconnectedPeripheral = data => {
-  //   let peripheral = peripherals.get(data.peripheral);
-  //   if (peripheral) {
-  //     peripheral.connected = false;
-  //     peripherals.set(peripheral.id, peripheral);
-  //     setList(Array.from(peripherals.values()));
-  //   }
-  //   console.log('Disconnected from ' + data.peripheral);
-  // };
-
-  //   const handleUpdateValueForCharacteristic = data => {
-  //     console.log(
-  //       'Received data from ' +
-  //         data.peripheral +
-  //         ' characteristic ' +
-  //         data.characteristic,
-  //       data.value,
-  //     );
-  //   };
-
-  const retrieveConnected = () => {
-    BleManager.getConnectedPeripherals([]).then(results => {
-      if (results.length === 0) {
-        console.log('No connected peripherals');
-      }
-      console.log(results);
-      for (var i = 0; i < results.length; i++) {
-        var peripheral = results[i];
-        peripheral.connected = true;
-        peripherals.set(peripheral.id, peripheral);
-        setList(Array.from(peripherals.values()));
-      }
-    });
-  };
+  const dispatch = useDispatch();
 
   const handleDiscoverPeripheral = (peripheral: {name: string; id: any}) => {
     console.log('Got ble peripheral', peripheral);
@@ -92,139 +36,27 @@ const BLEScannerScreen = ({navigation}: Props) => {
       peripheral.name = 'NO NAME';
     }
     peripherals.set(peripheral.id, peripheral);
-    setList(Array.from(peripherals.values()));
-  };
-
-  const testPeripheral = (peripheral: {connected: any; id: string}) => {
-    if (peripheral) {
-      if (peripheral.connected) {
-        BleManager.disconnect(peripheral.id);
-      } else {
-        BleManager.connect(peripheral.id)
-          .then(() => {
-            let p = peripherals.get(peripheral.id);
-            if (p) {
-              p.connected = true;
-              peripherals.set(peripheral.id, p);
-              setList(Array.from(peripherals.values()));
-            }
-            console.log('Connected to ' + peripheral.id);
-
-            setTimeout(() => {
-              /* Test read current RSSI value */
-              BleManager.retrieveServices(peripheral.id).then(
-                peripheralData => {
-                  console.log('Retrieved peripheral services', peripheralData);
-
-                  BleManager.readRSSI(peripheral.id).then(rssi => {
-                    console.log('Retrieved actual RSSI value', rssi);
-                    let k = peripherals.get(peripheral.id);
-                    if (k) {
-                      k.rssi = rssi;
-                      peripherals.set(peripheral.id, k);
-                      setList(Array.from(peripherals.values()));
-                    }
-                  });
-                },
-              );
-            }, 900);
-          })
-          .catch(error => {
-            console.log('Connection error', error);
-          });
-      }
-    }
-  };
-
-  const connectPeripheral = (peripheral: {connected: any; id: string}) => {
-    console.log('CONNTECTING TO PERIPHERAL - Connected: ', peripheral);
-    console.log('CONNTECTING TO PERIPHERAL - ID: ', peripheral);
-    BleManager.connect(peripheral.id)
-      .then(() => {
-        let p = peripherals.get(peripheral.id);
-        if (p) {
-          p.connected = true;
-          peripherals.set(peripheral.id, p);
-          setList(Array.from(peripherals.values()));
-        }
-        console.log('Connected to ' + peripheral.id);
-        setConnectedID(peripheral.id);
-      })
-      .catch(e => {
-        console.log('ERROR OCCURRED: ', e);
-      });
-
-    // Testing
-    setTimeout(() => {
-      /* Test read current RSSI value */
-      BleManager.retrieveServices(peripheral.id).then(peripheralData => {
-        console.log('Retrieved peripheral services', peripheralData);
-
-        BleManager.readRSSI(peripheral.id).then(rssi => {
-          console.log('Retrieved actual RSSI value', rssi);
-          let k = peripherals.get(peripheral.id);
-          if (k) {
-            k.rssi = rssi;
-            peripherals.set(peripheral.id, k);
-            setList(Array.from(peripherals.values()));
-          }
-        });
-      });
-    }, 900);
+    setDevicesFound(Array.from(peripherals.values()));
   };
 
   useEffect(() => {
-    BleManager.start({showAlert: false});
-
-    // bleManagerEmitter.addListener(
-    //   'BleManagerDiscoverPeripheral',
-    //   handleDiscoverPeripheral,
-    // );
-    // bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan);
-    // bleManagerEmitter.addListener(
+    bleManager.start({showAlert: true});
+    bleManagerEventEmitter.addListener(
+      'BleManagerDiscoverPeripheral',
+      handleDiscoverPeripheral,
+    );
+    // bleManagerEventEmitter.addListener('BleManagerStopScan', handleStopScan);
+    // bleManagerEventEmitter.addListener(
     //   'BleManagerDisconnectPeripheral',
     //   handleDisconnectedPeripheral,
     // );
-    // bleManagerEmitter.addListener(
+    // bleManagerEventEmitter.addListener(
     //   'BleManagerDidUpdateValueForCharacteristic',
     //   handleUpdateValueForCharacteristic,
     // );
-
-    if (Platform.OS === 'android' && Platform.Version >= 23) {
-      PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      ).then(result => {
-        if (result) {
-          console.log('Permission is OK');
-        } else {
-          PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          ).then(permissionResult => {
-            if (permissionResult) {
-              console.log('User accepted');
-            } else {
-              console.log('User refused');
-            }
-          });
-        }
-      });
-    }
-
     return () => {
       console.log('unmount');
-      // bleManagerEmitter.removeListener(
-      //   'BleManagerDiscoverPeripheral',
-      //   handleDiscoverPeripheral,
-      // );
-      // bleManagerEmitter.removeListener('BleManagerStopScan', handleStopScan);
-      // bleManagerEmitter.removeListener(
-      //   'BleManagerDisconnectPeripheral',
-      //   handleDisconnectedPeripheral,
-      // );
-      //   bleManagerEmitter.removeListener(
-      //     'BleManagerDidUpdateValueForCharacteristic',
-      //     handleUpdateValueForCharacteristic,
-      //   );
+      bleManagerEventEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
     };
   }, []);
 
@@ -236,31 +68,18 @@ const BLEScannerScreen = ({navigation}: Props) => {
       connectedID !== undefined &&
       connectedID !== ''
     ) {
-      readBLEValue();
+      // dispatch(readBLEDeviceAndUpdateValue());
     }
   }, 50); // 50ms should mean 20 updates per second
 
-  //   // Read BLE value
-  const readBLEValue = () => {
-    BleManager.read(PERIPHERAL_ID, SERVICE_UUID, CHARACTERISTIC_UUID)
-      .then(readData => {
-        // Success code
-        // console.log('Read: ' + readData);
-
-        const buffer = Buffer.from(readData);
-        const sensorData = buffer.readUInt8(0, true);
-        console.log('SENSOR DATA: ', sensorData);
-      })
-      .catch(error => {
-        // Failure code
-        console.log(error);
-      });
-  };
-
-  const renderItem = item => {
+  const renderItem = (item: any) => {
     const color = item.connected ? 'green' : '#fff';
     return (
-      <TouchableHighlight onPress={() => connectPeripheral(item)}>
+      <TouchableHighlight
+        onPress={() => {
+          console.log('BUTTON PRESSED');
+          connectToPeripheral(item, bleManager);
+        }}>
         <View style={[styles.row, {backgroundColor: color}]}>
           <Text
             style={{
@@ -312,26 +131,24 @@ const BLEScannerScreen = ({navigation}: Props) => {
             <View style={{margin: 10}}>
               <Button
                 title={'Scan Bluetooth (' + (isScanning ? 'on' : 'off') + ')'}
-                onPress={() => startScan()}
+                onPress={() => {
+                  let foundDevices: any = scanForBleDevices(bleManager);
+                  if (foundDevices && foundDevices?.length > 0) {
+                    setDevicesFound(foundDevices);
+                  }
+                }}
               />
             </View>
 
-            <View style={{margin: 10}}>
-              <Button
-                title="Retrieve connected peripherals"
-                onPress={() => retrieveConnected()}
-              />
-            </View>
-
-            {list.length == 0 && (
+            {devicesFound?.length == 0 && (
               <View style={{flex: 1, margin: 20}}>
-                <Text style={{textAlign: 'center'}}>No peripherals</Text>
+                <Text style={{textAlign: 'center'}}>No Devices Found</Text>
               </View>
             )}
           </View>
         </ScrollView>
         <FlatList
-          data={list}
+          data={devicesFound}
           renderItem={({item}) => renderItem(item)}
           keyExtractor={item => item.id}
         />
@@ -380,3 +197,35 @@ const styles = StyleSheet.create({
 });
 
 export default BLEScannerScreen;
+
+const scanForBleDevices = (bleManagerRef: BleManager) => {
+  bleManagerRef
+    .scan([], 3, true, {})
+    .then(_results => {
+      console.log('Devices Found: ', _results);
+      return _results;
+    })
+    .catch(err => {
+      console.error(err);
+      return null;
+    });
+};
+
+const connectToPeripheral = (peripheral: any, bleManagerRef: BleManager) => {
+  console.log('CONNTECTING TO PERIPHERAL - Connected: ', peripheral);
+  console.log('CONNTECTING TO PERIPHERAL - ID: ', peripheral);
+  bleManagerRef
+    .connect(peripheral.id)
+    .then(() => {
+      // let p = state.peripheralDevices.get(peripheral.id);
+      // if (p) {
+      //   p.connected = true;
+      //   state.peripheralDevices.set(peripheral.id, p);
+      // }
+      console.log('Connected to ' + peripheral.id);
+      // state.connectedDevices.push(peripheral.id);
+    })
+    .catch(e => {
+      console.log('ERROR OCCURRED: ', e);
+    });
+};
