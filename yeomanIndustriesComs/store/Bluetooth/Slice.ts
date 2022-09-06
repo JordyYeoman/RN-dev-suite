@@ -107,29 +107,29 @@ export const bluetoothSlice = createSlice({
           console.log('ERROR OCCURRED: ', e);
         });
     },
-    readBLEDeviceAndUpdateValue: state => {
-      state.bleManager
-        .read(
-          state.deviceIds[0].peripheralID,
-          state.deviceIds[0].serviceUUID,
-          state.deviceIds[0].characteristicUUID,
-        )
-        .then((readData: any) => {
-          const buffer = Buffer.from(readData);
-          const sensorDataPoint = buffer.readUInt8(0, true);
-          console.log('SENSOR DATA: ', sensorDataPoint);
-          if (state.sensorData.length <= 50) {
-            state.sensorData.push(sensorDataPoint);
-          } else {
-            let newData: number[] = state.sensorData.slice(1);
-            newData.push(sensorDataPoint);
-            state.sensorData = newData;
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
+    // readBLEDeviceAndUpdateValue: state => {
+    //   state.bleManager
+    //     .read(
+    //       state.deviceIds[0].peripheralID,
+    //       state.deviceIds[0].serviceUUID,
+    //       state.deviceIds[0].characteristicUUID,
+    //     )
+    //     .then((readData: any) => {
+    //       const buffer = Buffer.from(readData);
+    //       const sensorDataPoint = buffer.readUInt8(0, true);
+    //       console.log('SENSOR DATA: ', sensorDataPoint);
+    //       if (state.sensorData.length <= 50) {
+    //         state.sensorData.push(sensorDataPoint);
+    //       } else {
+    //         let newData: number[] = state.sensorData.slice(1);
+    //         newData.push(sensorDataPoint);
+    //         state.sensorData = newData;
+    //       }
+    //     })
+    //     .catch((error: any) => {
+    //       console.log(error);
+    //     });
+    // },
   },
   extraReducers: builder => {
     builder.addCase(scanForBleDevices.fulfilled, (state, {payload}) => {
@@ -150,7 +150,7 @@ export const {
   setConnected,
   retrieveConnected,
   connectPeripheral,
-  readBLEDeviceAndUpdateValue,
+  //   readBLEDeviceAndUpdateValue,
 } = bluetoothSlice.actions;
 
 export default bluetoothSlice.reducer;

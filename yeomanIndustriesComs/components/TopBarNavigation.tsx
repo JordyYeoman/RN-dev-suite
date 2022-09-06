@@ -71,7 +71,6 @@ const SecondaryNavBar = ({navigation, title}: any) => {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    // backgroundColor: 'white',
     paddingVertical: 16,
     paddingHorizontal: 8,
     flexDirection: 'row',
