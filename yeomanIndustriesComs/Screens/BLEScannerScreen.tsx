@@ -2,10 +2,8 @@ import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
-  ScrollView,
   View,
   Text,
-  Button,
   FlatList,
   TouchableHighlight,
   NativeEventEmitter,
@@ -17,10 +15,9 @@ import useInterval from '../utils/hooks/useInterval';
 import {GlobalStyles, themeStyles} from '../styles/GlobalStyles';
 import TopBarNavigation from '../components/TopBarNavigation';
 import {Props, ScreenType} from '../Types/Globaltypes';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {BleManager} from '../utils/bleManager';
 import BoxLayout from '../components/BoxLayout';
-import {readBLEDeviceAndUpdateValue} from '../store/Bluetooth/Slice';
 import {RootState} from '../store/store';
 import {Buffer} from 'buffer';
 
@@ -29,7 +26,7 @@ const bleManagerEventEmitter = new NativeEventEmitter(NativeModules.BleManager);
 
 const BLEScannerScreen = ({navigation}: Props) => {
   const [count, setCount] = useState(0);
-  const [connectedID, setConnectedID] = useState('');
+  // const [connectedID, setConnectedID] = useState('');
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [devicesFound, setDevicesFound] = useState<any>([]);
   const [connectedDevices, setConnectedDevices] = useState<any>([]);
@@ -62,16 +59,16 @@ const BLEScannerScreen = ({navigation}: Props) => {
       bleManagerEventEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
       bleManagerEventEmitter.removeAllListeners('BleManagerStopScan');
     };
-  }, []);
+  }, []); // Ignore error - This is fine as we need to only mount the listeners once
 
   const readBLEDeviceValue = () => {
     // console.log('READING VALUE?', deviceIds[0]);
 
     bleManager
       .read(
-        deviceIds[0].peripheralID,
-        deviceIds[0].serviceUUID,
-        deviceIds[0].characteristicUUID,
+        deviceIds[0].peripheralID.toLowerCase(),
+        deviceIds[0].serviceUUID.toLowerCase(),
+        deviceIds[0].characteristicUUID.toLowerCase(),
       )
       .then((readData: any) => {
         const buffer = Buffer.from(readData);
@@ -93,8 +90,10 @@ const BLEScannerScreen = ({navigation}: Props) => {
   // Poll the notification status:
   useInterval(() => {
     setCount(currentCount => currentCount + 1);
-    readBLEDeviceValue();
-  }, 50); // 50ms should mean 20 updates per second
+    if (deviceIds.length > 0 && connectedDevices.length > 0) {
+      readBLEDeviceValue();
+    }
+  }, 5440); // 50ms should mean 20 updates per second
 
   const handleNewDeviceConnection = (peripheral: any) => {
     console.log('Handling new connection');
@@ -301,7 +300,7 @@ export default BLEScannerScreen;
 
 const scanForBleDevices = (bleManagerRef: BleManager) => {
   bleManagerRef
-    .scan([], 3, true, {})
+    .scan([], 3, false, {})
     .then(_results => {
       console.log('Devices Found: ', _results);
       return _results;

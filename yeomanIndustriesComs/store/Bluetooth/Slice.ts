@@ -1,6 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
-import {Buffer} from 'buffer';
+// import {Buffer} from 'buffer';
 import {PermissionsAndroid, Platform} from 'react-native';
 import {scanForBleDevices} from './Actions';
 
@@ -24,9 +24,9 @@ const initialState: AppBluetoothState = {
   peripheralDevices: new Map(),
   deviceIds: [
     {
-      serviceUUID: '4fafc201-1fb5-459e-8fcc-c5c9c331914b',
-      characteristicUUID: 'beb5483e-36e1-4688-b7f5-ea07361b26a8',
-      peripheralID: 'B604D8B3-EB4D-C6B3-E257-9F2EC29F9C16',
+      serviceUUID: '4FAFC201-1FB5-459E-8FCC-C5C9C331914B',
+      characteristicUUID: 'BEB5483E-36E1-4688-B7F5-EA07361B26A8',
+      peripheralID: '9BDB63E8-33FA-962F-OBDA-1D9781E2B3B6', // Need a better method to find device ID....
     },
   ],
   connectedDevices: [],
@@ -88,26 +88,26 @@ export const bluetoothSlice = createSlice({
           }
         });
     },
-    connectPeripheral: (state, action: PayloadAction<any>) => {
-      const {peripheral} = action.payload;
-      console.log('CONNTECTING TO PERIPHERAL - Connected: ', peripheral);
-      console.log('CONNTECTING TO PERIPHERAL - ID: ', peripheral);
-      state.bleManager
-        .connect(peripheral.id)
-        .then(() => {
-          let p = state.peripheralDevices.get(peripheral.id);
-          if (p) {
-            p.connected = true;
-            state.peripheralDevices.set(peripheral.id, p);
-          }
-          console.log('Connected to ' + peripheral.id);
-          state.connectedDevices.push(peripheral.id);
-        })
-        .catch(e => {
-          console.log('ERROR OCCURRED: ', e);
-        });
-    },
-    // readBLEDeviceAndUpdateValue: state => {
+    // connectPeripheral: (state, action: PayloadAction<any>) => {
+    //   const {peripheral} = action.payload;
+    //   console.log('CONNTECTING TO PERIPHERAL - Connected: ', peripheral);
+    //   console.log('CONNTECTING TO PERIPHERAL - ID: ', peripheral);
+    //   state.bleManager
+    //     .connect(peripheral.id)
+    //     .then(() => {
+    //       let p = state.peripheralDevices.get(peripheral.id);
+    //       if (p) {
+    //         p.connected = true;
+    //         state.peripheralDevices.set(peripheral.id, p);
+    //       }
+    //       console.log('Connected to ' + peripheral.id);
+    //       state.connectedDevices.push(peripheral.id);
+    //     })
+    //     .catch(e => {
+    //       console.log('ERROR OCCURRED: ', e);
+    //     });
+    // },
+    // // readBLEDeviceAndUpdateValue: state => {
     //   state.bleManager
     //     .read(
     //       state.deviceIds[0].peripheralID,
@@ -149,7 +149,7 @@ export const {
   startManager,
   setConnected,
   retrieveConnected,
-  connectPeripheral,
+  // connectPeripheral,
   //   readBLEDeviceAndUpdateValue,
 } = bluetoothSlice.actions;
 
