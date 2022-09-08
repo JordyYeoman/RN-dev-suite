@@ -5,15 +5,15 @@ import {PermissionsAndroid, Platform} from 'react-native';
 import {scanForBleDevices} from './Actions';
 
 export interface BLEDevice {
-  serviceUUID: string;
-  characteristicUUID: string;
+  services: string[];
+  characteristics: any[];
   peripheralID: string;
 }
 
 export interface AppBluetoothState {
-  deviceIds: BLEDevice[];
+  devices: BLEDevice[];
   connected: boolean;
-  peripheralDevices: Map<string, any>;
+  // peripheralDevices: Map<string, any>;
   scanning: boolean;
   connectedDevices: any[];
   permissionResult: boolean;
@@ -21,13 +21,13 @@ export interface AppBluetoothState {
 }
 
 const initialState: AppBluetoothState = {
-  peripheralDevices: new Map(),
-  deviceIds: [
-    {
-      serviceUUID: '4FAFC201-1FB5-459E-8FCC-C5C9C331914B',
-      characteristicUUID: 'BEB5483E-36E1-4688-B7F5-EA07361B26A8',
-      peripheralID: '9BDB63E8-33FA-962F-OBDA-1D9781E2B3B6', // Need a better method to find device ID....
-    },
+  // peripheralDevices: new Map(),
+  devices: [
+    // {
+    //   serviceUUID: '4FAFC201-1FB5-459E-8FCC-C5C9C331914B',
+    //   characteristicUUID: 'BEB5483E-36E1-4688-B7F5-EA07361B26A8',
+    //   peripheralID: '9BDB63E8-33FA-962F-OBDA-1D9781E2B3B6', // Need a better method to find device ID....
+    // },
   ],
   connectedDevices: [],
   connected: false,
@@ -42,6 +42,15 @@ export const bluetoothSlice = createSlice({
   name: 'bluetooth',
   initialState,
   reducers: {
+    addBLEDevice: (state, {payload}: {payload: any}) => {
+      console.log('PAYLOAD: ', payload);
+      let newDevice = {
+        peripheralID: payload?.id,
+        services: payload?.services,
+        characteristics: payload?.characteristics,
+      };
+      state.devices = [...state.devices, newDevice];
+    },
     startManager: (state, action) => {
       console.log('ACTION: ', action);
       action.payload.bleManager.start({showAlert: true});
@@ -73,21 +82,21 @@ export const bluetoothSlice = createSlice({
     setConnected: (state, action: PayloadAction<boolean>) => {
       state.connected = action.payload;
     },
-    retrieveConnected: (state, action) => {
-      action.payload.bleManager
-        .getConnectedPeripherals([])
-        .then((results: any) => {
-          if (results.length === 0) {
-            console.log('No connected peripherals');
-          }
-          console.log('List of connected peripherals: ', results);
-          for (var i = 0; i < results.length; i++) {
-            var peripheral = results[i];
-            peripheral.connected = true;
-            state.peripheralDevices.set(peripheral.id, peripheral);
-          }
-        });
-    },
+    // retrieveConnected: (state, action) => {
+    //   action.payload.bleManager
+    //     .getConnectedPeripherals([])
+    //     .then((results: any) => {
+    //       if (results.length === 0) {
+    //         console.log('No connected peripherals');
+    //       }
+    //       console.log('List of connected peripherals: ', results);
+    //       for (var i = 0; i < results.length; i++) {
+    //         var peripheral = results[i];
+    //         peripheral.connected = true;
+    //         state.peripheralDevices.set(peripheral.id, peripheral);
+    //       }
+    //     });
+    // },
     // connectPeripheral: (state, action: PayloadAction<any>) => {
     //   const {peripheral} = action.payload;
     //   console.log('CONNTECTING TO PERIPHERAL - Connected: ', peripheral);
@@ -134,6 +143,7 @@ export const bluetoothSlice = createSlice({
   extraReducers: builder => {
     builder.addCase(scanForBleDevices.fulfilled, (state, {payload}) => {
       console.log('ACTIONPAYLOAD: ', payload);
+
       //   state.peripheralDevices = payload;
     });
     builder.addCase(scanForBleDevices.pending, state => {
@@ -148,7 +158,8 @@ export const bluetoothSlice = createSlice({
 export const {
   startManager,
   setConnected,
-  retrieveConnected,
+  // retrieveConnected,
+  addBLEDevice,
   // connectPeripheral,
   //   readBLEDeviceAndUpdateValue,
 } = bluetoothSlice.actions;
