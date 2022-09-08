@@ -185,7 +185,9 @@ const BLEScannerScreen = ({navigation}: Props) => {
           screen={ScreenType.SECONDARY}
           title={'Devices'}
         />
-        <Text>{count}</Text>
+        <Text style={{color: 'white', fontWeight: 'bold', paddingLeft: 8}}>
+          {count}
+        </Text>
         <View style={styles.row}>
           <View style={styles.column}>
             <AppButton
