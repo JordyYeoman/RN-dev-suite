@@ -2,7 +2,6 @@ import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 // import {Buffer} from 'buffer';
 import {PermissionsAndroid, Platform} from 'react-native';
-import {scanForBleDevices} from './Actions';
 
 export interface BLEDevice {
   services: string[];
@@ -11,16 +10,19 @@ export interface BLEDevice {
 }
 
 export interface AppBluetoothState {
+  currentBLEDataPoint: number;
   devices: BLEDevice[];
+  devicesFound: any[];
+  connectedDevices: any[];
   connected: boolean;
   // peripheralDevices: Map<string, any>;
-  scanning: boolean;
-  connectedDevices: any[];
+  isScanning: boolean;
   permissionResult: boolean;
   sensorData: number[];
 }
 
 const initialState: AppBluetoothState = {
+  currentBLEDataPoint: 0,
   // peripheralDevices: new Map(),
   devices: [
     // {
@@ -29,9 +31,10 @@ const initialState: AppBluetoothState = {
     //   peripheralID: '9BDB63E8-33FA-962F-OBDA-1D9781E2B3B6', // Need a better method to find device ID....
     // },
   ],
+  devicesFound: [],
   connectedDevices: [],
   connected: false,
-  scanning: false,
+  isScanning: false,
   permissionResult: false,
   sensorData: [],
 };
@@ -79,8 +82,23 @@ export const bluetoothSlice = createSlice({
         });
       }
     },
+    setBLEDataPoint: (state, action: PayloadAction<number>) => {
+      console.log('DP: ', action.payload);
+      state.currentBLEDataPoint = action.payload;
+    },
     setConnected: (state, action: PayloadAction<boolean>) => {
       state.connected = action.payload;
+    },
+    setDevicesFound: (state, action: PayloadAction<any>) => {
+      state.devicesFound = action.payload;
+    },
+    setConnectedDevices: (state, action: PayloadAction<any>) => {
+      // TODO: When Flipper issue is resolved for physical devices, check store if multiple devices are correctly added
+      // and not the case of just one device replacing a new device each time.
+      state.connectedDevices = [...state.connectedDevices, action.payload];
+    },
+    setScanning: (state, action: PayloadAction<boolean>) => {
+      state.isScanning = action.payload;
     },
     // retrieveConnected: (state, action) => {
     //   action.payload.bleManager
@@ -140,26 +158,30 @@ export const bluetoothSlice = createSlice({
     //     });
     // },
   },
-  extraReducers: builder => {
-    builder.addCase(scanForBleDevices.fulfilled, (state, {payload}) => {
-      console.log('ACTIONPAYLOAD: ', payload);
+  // extraReducers: builder => {
+  //   builder.addCase(scanForBleDevices.fulfilled, (state, {payload}) => {
+  //     console.log('ACTIONPAYLOAD: ', payload);
 
-      //   state.peripheralDevices = payload;
-    });
-    builder.addCase(scanForBleDevices.pending, state => {
-      state.scanning = true;
-    });
-    builder.addCase(scanForBleDevices.rejected, state => {
-      state.scanning = false;
-    });
-  },
+  //     //   state.peripheralDevices = payload;
+  //   });
+  //   builder.addCase(scanForBleDevices.pending, state => {
+  //     state.scanning = true;
+  //   });
+  //   builder.addCase(scanForBleDevices.rejected, state => {
+  //     state.scanning = false;
+  //   });
+  // },
 });
 
 export const {
   startManager,
   setConnected,
+  setScanning,
+  setDevicesFound,
+  setConnectedDevices,
   // retrieveConnected,
   addBLEDevice,
+  setBLEDataPoint,
   // connectPeripheral,
   //   readBLEDeviceAndUpdateValue,
 } = bluetoothSlice.actions;

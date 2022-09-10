@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -21,7 +21,13 @@ import {BleManager} from '../utils/bleManager';
 import BoxLayout from '../components/BoxLayout';
 import {RootState} from '../store/store';
 import {Buffer} from 'buffer';
-import {addBLEDevice} from '../store/Bluetooth/Slice';
+import {
+  addBLEDevice,
+  setBLEDataPoint,
+  setConnectedDevices,
+  setDevicesFound,
+  setScanning,
+} from '../store/Bluetooth/Slice';
 
 const bleManager = new BleManager();
 const bleManagerEventEmitter = new NativeEventEmitter(NativeModules.BleManager);
@@ -31,15 +37,17 @@ const bleManagerEventEmitter = new NativeEventEmitter(NativeModules.BleManager);
 // 3. Add read functionality to chart component
 // 4. Check for connection status every x amount of time
 // 5. Ensure we try to reconnect if device connection is lost
+// 6. Allow ESP32 to reconnect a new device if connection is lost
 
 const BLEScannerScreen = ({navigation}: Props) => {
-  const [count, setCount] = useState(0);
-  // const [connectedID, setConnectedID] = useState('');
-  const [isScanning, setIsScanning] = useState<boolean>(false);
-  const [devicesFound, setDevicesFound] = useState<any>([]);
-  const [connectedDevices, setConnectedDevices] = useState<any>([]);
   const peripherals = new Map();
-  const {devices} = useSelector((state: RootState) => state.bluetooth);
+  const {
+    devicesFound,
+    connectedDevices,
+    devices,
+    currentBLEDataPoint,
+    isScanning,
+  } = useSelector((state: RootState) => state.bluetooth);
   const dispatch = useDispatch();
 
   // BLUETOOTH EVENT LISTENERS
@@ -48,12 +56,12 @@ const BLEScannerScreen = ({navigation}: Props) => {
       peripheral.name = 'NO NAME';
     }
     peripherals.set(peripheral.id, peripheral);
-    setDevicesFound(Array.from(peripherals.values()));
+    dispatch(setDevicesFound(Array.from(peripherals.values())));
   };
 
   const handleStopScan = () => {
     console.log('Scan is stopped');
-    setIsScanning(false);
+    dispatch(setScanning(false));
   };
 
   useEffect(() => {
@@ -72,8 +80,7 @@ const BLEScannerScreen = ({navigation}: Props) => {
 
   const readRSSI = async (peripheralId: string) => {
     console.log('READING RSSI of ' + peripheralId);
-    let x = await bleManager.readRSSI(peripheralId);
-    console.log(x);
+    console.log(await bleManager.readRSSI(peripheralId));
   };
 
   const getConnectedPeripherals = async (peripheralIds: string[]) => {
@@ -95,14 +102,7 @@ const BLEScannerScreen = ({navigation}: Props) => {
           const buffer = Buffer.from(readData);
           const sensorDataPoint = buffer.readUInt8(0, true);
           console.log(sensorDataPoint);
-          setCount(sensorDataPoint);
-          // if (state.sensorData.length <= 50) {
-          //   state.sensorData.push(sensorDataPoint);
-          // } else {
-          // let newData: number[] = state.sensorData.slice(1);
-          // newData.push(sensorDataPoint);
-          // state.sensorData = newData;
-          // }
+          dispatch(setBLEDataPoint(sensorDataPoint));
         })
         .catch(error => {
           console.log(error);
@@ -112,19 +112,14 @@ const BLEScannerScreen = ({navigation}: Props) => {
 
   // Poll the notification status:
   useInterval(() => {
-    if (devices.length > 0 && connectedDevices.length > 0) {
-      // setCount(currentCount => currentCount + 1);
-      // Hijack setCount to display read value from bleDevice
+    if (devices?.length > 0 && connectedDevices?.length > 0) {
       readBLEDeviceValue();
     }
   }, 50); // 50ms should mean 20 updates per second
 
   const handleNewDeviceConnection = (peripheral: any) => {
     console.log('Handling new connection');
-    setConnectedDevices((prevState: string[]) => [
-      ...prevState,
-      peripheral?.id,
-    ]);
+    dispatch(setConnectedDevices(peripheral?.id));
   };
 
   const renderItem = (item: any) => {
@@ -192,24 +187,24 @@ const BLEScannerScreen = ({navigation}: Props) => {
           title={'Devices'}
         />
         <Text style={{color: 'white', fontWeight: 'bold', paddingLeft: 8}}>
-          {count}
+          {currentBLEDataPoint}
         </Text>
         <View style={styles.row}>
           <View style={styles.column}>
             <AppButton
               buttonText={isScanning ? 'Scanning' : 'Start Scan'}
               action={() => {
-                setIsScanning(true);
+                dispatch(setScanning(true));
                 let foundDevices: any = scanForBleDevices(bleManager);
                 if (foundDevices && foundDevices?.length > 0) {
-                  setDevicesFound(foundDevices);
+                  dispatch(setDevicesFound(foundDevices));
                 }
               }}
             />
             <AppButton
               buttonText={'Get Connected Devices'}
               action={() => {
-                if (devices.length > 0) {
+                if (devices.length > 0 && devices[0]?.services?.length > 0) {
                   getConnectedPeripherals([
                     devices[0].services[0].toLowerCase(),
                   ]);
@@ -218,8 +213,8 @@ const BLEScannerScreen = ({navigation}: Props) => {
             />
             <AppButton
               buttonText={'GetBondedPeripherals'}
-              action={() => {
-                bleManager.getBondedPeripherals();
+              action={async () => {
+                await bleManager.getBondedPeripherals();
               }}
             />
           </View>
@@ -405,7 +400,6 @@ const scanForBleDevices = (bleManagerRef: BleManager) => {
   bleManagerRef
     .scan([], 3, false, {})
     .then(_results => {
-      console.log('Devices Found: ', _results);
       return _results;
     })
     .catch(err => {
