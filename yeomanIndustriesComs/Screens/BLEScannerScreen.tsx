@@ -26,6 +26,12 @@ import {addBLEDevice} from '../store/Bluetooth/Slice';
 const bleManager = new BleManager();
 const bleManagerEventEmitter = new NativeEventEmitter(NativeModules.BleManager);
 
+// 1. Remove any state to redux store that can be moved
+// 2. Move bleManager to a wrapper context so the entire app has access
+// 3. Add read functionality to chart component
+// 4. Check for connection status every x amount of time
+// 5. Ensure we try to reconnect if device connection is lost
+
 const BLEScannerScreen = ({navigation}: Props) => {
   const [count, setCount] = useState(0);
   // const [connectedID, setConnectedID] = useState('');
