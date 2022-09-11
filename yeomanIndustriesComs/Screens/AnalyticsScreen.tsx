@@ -1,13 +1,12 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {View, SafeAreaView, Text, StyleSheet} from 'react-native';
-import {useSelector, useStore} from 'react-redux';
+import {useSelector} from 'react-redux';
 import BoxLayout from '../components/BoxLayout';
 import LineChart from '../components/charts/LineChart';
 import TopBarNavigation from '../components/TopBarNavigation';
 import {RootState} from '../store/store';
 import {GlobalStyles} from '../styles/GlobalStyles';
 import {ScreenType} from '../Types/Globaltypes';
-import useInterval from '../utils/hooks/useInterval';
 
 export const AnalyticsScreen = ({navigation}: any) => {
   // Turns out its not more performant to only render every x milliseconds...

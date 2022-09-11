@@ -43,7 +43,8 @@ const HomeNavBar = ({navigation}: any) => {
 };
 
 const SecondaryNavBar = ({navigation, title}: any) => {
-  const {connected} = useSelector((state: RootState) => state.user);
+  const {connected} = useSelector((state: RootState) => state.bluetooth);
+  console.log('Connected: ', connected);
   return (
     <View style={styles.container}>
       <View style={styles.flex}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import {LineChart} from 'react-native-svg-charts';
+import {LineChart, XAxis, YAxis} from 'react-native-svg-charts';
 import {View} from 'react-native';
 import {G, Line} from 'react-native-svg';
 
@@ -40,6 +40,16 @@ const DataLineChart = ({data}: LineChartProps) => {
   );
   return (
     <View style={{height: 200, flexDirection: 'row'}}>
+      <YAxis
+        data={data}
+        contentInset={{top: 5, bottom: 0}}
+        svg={{
+          fill: 'white',
+          fontSize: 4,
+        }}
+        numberOfTicks={30}
+        formatLabel={(value: any) => value}
+      />
       <LineChart
         style={{flex: 1}}
         data={data}
@@ -47,6 +57,13 @@ const DataLineChart = ({data}: LineChartProps) => {
           stroke: 'rgb(134, 65, 244)',
         }}>
         <CustomGrid belowChart={true} />
+        <XAxis
+          style={{marginHorizontal: 0, bottom: 0}}
+          data={data}
+          formatLabel={(value: any, index: number) => index}
+          contentInset={{left: 10, right: 10, bottom: 0}}
+          svg={{fontSize: 4, fill: 'white'}}
+        />
       </LineChart>
     </View>
   );

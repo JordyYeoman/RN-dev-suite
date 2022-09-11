@@ -297,7 +297,7 @@ const connectToPeripheral = (
       // );
       // Actions triggering BleManagerDidUpdateValueForCharacteristic event
       console.log('--------------------------------');
-      stateCallback(peripheral);
+      stateCallback(peripheral?.id);
     })
     .catch(e => {
       console.log('ERROR OCCURRED: ', e);

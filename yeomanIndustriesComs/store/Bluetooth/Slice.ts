@@ -84,7 +84,7 @@ export const bluetoothSlice = createSlice({
       }
     },
     setBLEDataPoint: (state, action: PayloadAction<number>) => {
-      if (state.sensorData.length <= 50) {
+      if (state.sensorData.length <= 40) {
         state.sensorData = [...state.sensorData, action.payload];
       } else {
         state.sensorData = removeFirstDPAndAddNewDP(
@@ -101,6 +101,7 @@ export const bluetoothSlice = createSlice({
       state.devicesFound = action.payload;
     },
     setConnectedDevices: (state, action: PayloadAction<any>) => {
+      state.connected = true;
       // TODO: When Flipper issue is resolved for physical devices, check store if multiple devices are correctly added
       // and not the case of just one device replacing a new device each time.
       state.connectedDevices = [...state.connectedDevices, action.payload];
