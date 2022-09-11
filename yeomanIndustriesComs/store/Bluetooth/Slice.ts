@@ -2,6 +2,7 @@ import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 // import {Buffer} from 'buffer';
 import {PermissionsAndroid, Platform} from 'react-native';
+import {removeFirstDPAndAddNewDP} from '../../utils/hooks/generateData';
 
 export interface BLEDevice {
   services: string[];
@@ -83,7 +84,14 @@ export const bluetoothSlice = createSlice({
       }
     },
     setBLEDataPoint: (state, action: PayloadAction<number>) => {
-      console.log('DP: ', action.payload);
+      if (state.sensorData.length <= 50) {
+        state.sensorData = [...state.sensorData, action.payload];
+      } else {
+        state.sensorData = removeFirstDPAndAddNewDP(
+          action.payload,
+          state.sensorData,
+        );
+      }
       state.currentBLEDataPoint = action.payload;
     },
     setConnected: (state, action: PayloadAction<boolean>) => {

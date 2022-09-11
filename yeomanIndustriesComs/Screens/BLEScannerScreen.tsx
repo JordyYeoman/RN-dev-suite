@@ -1,46 +1,38 @@
 import React, {useEffect} from 'react';
 import {
   SafeAreaView,
-  StyleSheet,
   View,
   Text,
   FlatList,
   TouchableHighlight,
-  NativeEventEmitter,
-  NativeModules,
-  ColorValue,
   TouchableOpacity,
 } from 'react-native';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
-import useInterval from '../utils/hooks/useInterval';
 import {GlobalStyles, themeStyles} from '../styles/GlobalStyles';
 import TopBarNavigation from '../components/TopBarNavigation';
-import {Props, ScreenType} from '../Types/Globaltypes';
+import {BluetoothContextType, Props, ScreenType} from '../Types/Globaltypes';
 import {useDispatch, useSelector} from 'react-redux';
-import {BleManager} from '../utils/bleManager';
 import BoxLayout from '../components/BoxLayout';
 import {RootState} from '../store/store';
-import {Buffer} from 'buffer';
 import {
   addBLEDevice,
-  setBLEDataPoint,
   setConnectedDevices,
   setDevicesFound,
   setScanning,
 } from '../store/Bluetooth/Slice';
+import {BluetoothContext} from '../context/BluetoothContext';
+import {BleManager} from '../utils/bleManager';
+import {styles} from '../styles/BluetoothScreenStyles';
 
-const bleManager = new BleManager();
-const bleManagerEventEmitter = new NativeEventEmitter(NativeModules.BleManager);
-
-// 1. Remove any state to redux store that can be moved
-// 2. Move bleManager to a wrapper context so the entire app has access
-// 3. Add read functionality to chart component
+// TODO:
 // 4. Check for connection status every x amount of time
 // 5. Ensure we try to reconnect if device connection is lost
 // 6. Allow ESP32 to reconnect a new device if connection is lost
+// 7. Add X and Y coordinates to the linechart
 
 const BLEScannerScreen = ({navigation}: Props) => {
-  const peripherals = new Map();
+  const {bleManager} = React.useContext(
+    BluetoothContext,
+  ) as BluetoothContextType;
   const {
     devicesFound,
     connectedDevices,
@@ -50,33 +42,7 @@ const BLEScannerScreen = ({navigation}: Props) => {
   } = useSelector((state: RootState) => state.bluetooth);
   const dispatch = useDispatch();
 
-  // BLUETOOTH EVENT LISTENERS
-  const handleDiscoverPeripheral = (peripheral: {name: string; id: any}) => {
-    if (!peripheral.name) {
-      peripheral.name = 'NO NAME';
-    }
-    peripherals.set(peripheral.id, peripheral);
-    dispatch(setDevicesFound(Array.from(peripherals.values())));
-  };
-
-  const handleStopScan = () => {
-    console.log('Scan is stopped');
-    dispatch(setScanning(false));
-  };
-
-  useEffect(() => {
-    bleManager.start({showAlert: true});
-    bleManagerEventEmitter.addListener(
-      'BleManagerDiscoverPeripheral',
-      handleDiscoverPeripheral,
-    );
-    bleManagerEventEmitter.addListener('BleManagerStopScan', handleStopScan);
-    return () => {
-      console.log('unmount');
-      bleManagerEventEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
-      bleManagerEventEmitter.removeAllListeners('BleManagerStopScan');
-    };
-  }, []); // Ignore error - This is fine as we need to only mount the listeners once
+  useEffect(() => {}, []); // Ignore error - This is fine as we need to only mount the listeners once
 
   const readRSSI = async (peripheralId: string) => {
     console.log('READING RSSI of ' + peripheralId);
@@ -89,33 +55,6 @@ const BLEScannerScreen = ({navigation}: Props) => {
     );
     console.log('CONNECTED PERIPHERALS: ', connectedPeripherals);
   };
-
-  const readBLEDeviceValue = () => {
-    if (devices.length > 0) {
-      bleManager
-        .read(
-          devices[0].peripheralID,
-          devices[0].services[0],
-          devices[0].characteristics[0].characteristic,
-        )
-        .then((readData: any) => {
-          const buffer = Buffer.from(readData);
-          const sensorDataPoint = buffer.readUInt8(0, true);
-          console.log(sensorDataPoint);
-          dispatch(setBLEDataPoint(sensorDataPoint));
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
-  };
-
-  // Poll the notification status:
-  useInterval(() => {
-    if (devices?.length > 0 && connectedDevices?.length > 0) {
-      readBLEDeviceValue();
-    }
-  }, 50); // 50ms should mean 20 updates per second
 
   const handleNewDeviceConnection = (peripheral: any) => {
     console.log('Handling new connection');
@@ -299,101 +238,6 @@ const BLEScannerScreen = ({navigation}: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  column: {
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    width: '100%',
-  },
-  button: {
-    textAlign: 'center',
-    borderRadius: 10,
-    width: '100%',
-    paddingVertical: 12,
-    marginTop: 10,
-    fontWeight: 'bold',
-    alignItems: 'center',
-    backgroundColor: themeStyles.secondary.backgroundColor as ColorValue,
-  },
-  buttonText: {
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    fontSize: 16,
-    color: 'white',
-  },
-  flatList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    height: 600,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  connectedDeviceContainer: {
-    width: '100%',
-    height: 'auto',
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  connectedDevice: {
-    backgroundColor: 'white',
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-    borderRadius: 4,
-    marginVertical: 6,
-  },
-  renderItem: {
-    width: 100,
-    height: 68,
-    margin: 10,
-    borderRadius: 10,
-    overflow: 'hidden',
-    padding: 10,
-    backgroundColor: themeStyles.secondary.backgroundColor as ColorValue,
-  },
-  renderItemHeading: {
-    fontWeight: 'bold',
-    fontSize: 12,
-  },
-  renderItemSubHeading: {
-    fontWeight: 'bold',
-    fontSize: 8,
-  },
-  renderItemExtraSmall: {
-    fontSize: 6,
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
-
 export default BLEScannerScreen;
 
 const scanForBleDevices = (bleManagerRef: BleManager) => {
@@ -422,7 +266,7 @@ const connectToPeripheral = (
       console.log('Connected to ' + peripheral.id);
       console.log('--------------------------------');
       console.log('Retreiving Services: ');
-      let res: any = await bleManager.retrieveServices(peripheral.id, [
+      let res: any = await bleManagerRef.retrieveServices(peripheral.id, [
         '4FAFC201-1FB5-459E-8FCC-C5C9C331914B',
       ]);
       if (res) {
@@ -431,12 +275,12 @@ const connectToPeripheral = (
       console.log('Reading Value: ');
       // For some reason.... reading the value immediately triggers the ability to continue reading values,
       // without this read below the follow up reads fail.
-      let initialValue = await bleManager.read(
+      let initialValue = await bleManagerRef.read(
         peripheral.id,
         res.services[0],
         res.characteristics[0].characteristic,
       );
-      // let x = await bleManager.startNotification(
+      // let x = await bleManagerRef.startNotification(
       //   peripheral.id,
       //   res.services[0],
       //   res.characteristics[0].characteristic,
@@ -451,7 +295,7 @@ const connectToPeripheral = (
       //     console.log(`Received ${data} for characteristic ${characteristic}`);
       //   },
       // );
-      // Actions triggereng BleManagerDidUpdateValueForCharacteristic event
+      // Actions triggering BleManagerDidUpdateValueForCharacteristic event
       console.log('--------------------------------');
       stateCallback(peripheral);
     })

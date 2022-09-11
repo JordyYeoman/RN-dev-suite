@@ -5,6 +5,12 @@ export const generateData = (data: number[]) => {
   return newData;
 };
 
+export const removeFirstDPAndAddNewDP = (dataPoint: number, data: number[]) => {
+  let newData: number[] = data.slice(1); // Shallow copy & remove the first element of the array
+  newData.push(dataPoint);
+  return newData;
+};
+
 export const getRandomNumberFromRange = (min: number, max: number) => {
   min = Math.ceil(min);
   max = Math.floor(max);

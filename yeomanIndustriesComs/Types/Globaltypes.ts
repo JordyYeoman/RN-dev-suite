@@ -1,4 +1,6 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {NativeEventEmitter} from 'react-native';
+import {BleManager} from '../utils/bleManager';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -19,3 +21,8 @@ export enum ScreenType {
   HOME = 'home',
   SECONDARY = 'secondary',
 }
+
+export type BluetoothContextType = {
+  bleManager: BleManager;
+  bleManagerEventEmitter: NativeEventEmitter;
+};
