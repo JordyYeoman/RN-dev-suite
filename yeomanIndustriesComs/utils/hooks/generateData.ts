@@ -6,9 +6,10 @@ export const generateData = (data: number[]) => {
 };
 
 export const removeFirstDPAndAddNewDP = (dataPoint: number, data: number[]) => {
-  let newData: number[] = data.slice(1); // Shallow copy & remove the first element of the array
-  newData.push(dataPoint);
-  return newData;
+  // let newData: number[] = data.slice(1); // Shallow copy & remove the first element of the array
+  data.shift(); // Using shift is almost 10x faster than slicing when using only one element.
+  data.push(dataPoint);
+  return data;
 };
 
 export const getRandomNumberFromRange = (min: number, max: number) => {
